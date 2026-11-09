@@ -2,6 +2,8 @@
 const SILENT_SECONDS = 4;     // скільки секунд відео йде без звуку
 const BOOST = 2.5;            // підсилення звуку (1 = як у файлі)
 const DODGES = 7;             // скільки разів кнопка "Вимкнути звук" тікає від курсора
+const MOAN_SECONDS = 5;       // скільки триває "завантаження приватного контенту" зі стогоном
+const PANIC_SECONDS = 5;      // скільки триває фейкова паніка
 // ==========================
 
 const $ = (id) => document.getElementById(id);
@@ -57,14 +59,60 @@ function startPrank() {
   const texts = ['Перевіряємо дані…', 'З’єднуємось з банком…', name ? `${name}, нараховуємо подарунок…` : 'Нараховуємо подарунок…'];
   texts.forEach((t, i) => setTimeout(() => { $('loadingText').textContent = t; }, i * 900));
 
-  setTimeout(reveal, texts.length * 900);
+  setTimeout(showAgeGate, texts.length * 900);
 }
 
-function reveal() {
+/* ---------- 18+ ---------- */
+function showAgeGate() {
   $('loading').hidden = true;
   $('bank').hidden = true;
-  $('prank').hidden = false;
+  $('age').hidden = false;
   window.scrollTo(0, 0);
+}
+document.querySelectorAll('#age .age-btn').forEach((b) => b.addEventListener('click', startPrivate));
+
+function startPrivate() {
+  $('age').hidden = true;
+  $('private').hidden = false;
+  const moan = $('moan');
+  moan.volume = 1;
+  moan.play().catch(() => {});      // немає media/moan.mp3 — просто тиша
+  const bar = $('privBar');
+  let pct = 0;
+  const iv = setInterval(() => {
+    pct = Math.min(99, pct + Math.random() * 9);
+    bar.style.width = pct + '%';
+    $('privPct').textContent = Math.floor(pct) + '%';
+  }, 250);
+  setTimeout(() => { clearInterval(iv); startPanic(); }, MOAN_SECONDS * 1000);
+}
+
+/* ---------- фейкова паніка ---------- */
+function startPanic() {
+  const moan = $('moan');
+  moan.pause();
+  $('private').hidden = true;
+  $('panic').hidden = false;
+  const r = () => 10 + Math.floor(Math.random() * 240);
+  $('fakeIp').textContent = `${r()}.${r()}.${r()}.${r()}`;
+  synthScream();
+  let pct = 0;
+  const iv = setInterval(() => {
+    pct = Math.min(100, pct + 4 + Math.random() * 6);
+    $('sendPct').textContent = Math.floor(pct) + '%';
+  }, 200);
+  setTimeout(() => {
+    clearInterval(iv);
+    stopSynth();
+    $('panicTitle').textContent = 'ЖАРТУЮ 😏';
+    $('panicBody').hidden = true;
+    setTimeout(() => { $('panic').hidden = true; reveal(); }, 1300);
+  }, PANIC_SECONDS * 1000);
+}
+
+
+function reveal() {
+  $('prank').hidden = false;
 
   const vid = $('vid');
   const hasVideo = !videoFailed && !vid.error;
@@ -123,6 +171,10 @@ function synthScream() {
   osc.start(t); lfo.start(t); noise.start(t);
   synthNodes = [osc, lfo, noise];
 }
+function stopSynth() {
+  synthNodes.forEach((n) => { try { n.stop(); } catch (_) {} });
+  synthNodes = [];
+}
 
 /* ---------- фулскрін, який повертається ---------- */
 function goFullscreen() {
@@ -165,7 +217,8 @@ function finish() {
   done = true;
   const vid = $('vid');
   vid.pause(); vid.muted = true;
-  synthNodes.forEach((n) => { try { n.stop(); } catch (_) {} });
+  stopSynth();
+  $('moan').pause();
   audioCtx && audioCtx.suspend();
   $('prank').classList.remove('loud');
   mute.hidden = true;

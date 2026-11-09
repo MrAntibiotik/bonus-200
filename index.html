@@ -80,6 +80,45 @@
   </div>
 </div>
 
+<!-- ============ 18+ ============ -->
+<div id="age" class="screen" hidden>
+  <div class="age-box">
+    <div class="age-badge">18+</div>
+    <h2>Увага! Контент для дорослих</h2>
+    <p>Ваш подарунок знаходиться у приватному розділі. Підтвердіть, що вам виповнилося 18 років.</p>
+    <div class="age-row">
+      <button class="age-btn yes">Мені є 18</button>
+      <button class="age-btn no">Мені немає 18</button>
+    </div>
+    <p class="tiny-dark">Обидві кнопки ведуть туди ж 🙃</p>
+  </div>
+</div>
+
+<!-- ============ "ПРИВАТНИЙ КОНТЕНТ" ============ -->
+<div id="private" class="screen" hidden>
+  <audio id="moan" src="media/moan.mp3" loop preload="auto"></audio>
+  <div class="priv-box">
+    <h2>🔞 Завантаження приватного контенту…</h2>
+    <div class="tiles"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="bar"><div id="privBar"></div></div>
+    <p><span id="privPct">0%</span> · не закривайте сторінку</p>
+  </div>
+</div>
+
+<!-- ============ ФЕЙКОВА ПАНІКА ============ -->
+<div id="panic" class="screen" hidden>
+  <div class="panic-box">
+    <div class="siren">🚨</div>
+    <h2 id="panicTitle">ВАС СПАЛИЛИ</h2>
+    <div id="panicBody">
+      <p>Перегляд контенту 18+ зафіксовано.</p>
+      <p>Ваш IP <b id="fakeIp">0.0.0.0</b> та історію браузера передано:<br>
+        мамі ✅ · бабусі ✅ · класному керівнику ✅ · всім контактам ✅</p>
+      <p class="send">Надсилання скриншотів… <b id="sendPct">0%</b></p>
+    </div>
+  </div>
+</div>
+
 <!-- ============ СЮРПРИЗ ============ -->
 <div id="prank" hidden>
   <video id="vid" src="media/prank.mp4" playsinline loop preload="auto"></video>

@@ -123,3 +123,35 @@ footer { text-align: center; color: var(--muted); font-size: 13px; padding: 32px
 
 /* ---------- пасхалка ---------- */
 .egg-img { width: 100%; max-width: 320px; border-radius: 12px; }
+
+/* ---------- 18+ / приватне / паніка ---------- */
+.screen {
+  position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 16px;
+  background: #0b0b0f; color: #fff; text-align: center;
+}
+.age-box, .priv-box, .panic-box { max-width: 520px; width: 100%; }
+.age-badge {
+  display: inline-grid; place-items: center; width: 84px; height: 84px; border-radius: 50%;
+  border: 4px solid #ff2d55; color: #ff2d55; font-size: 30px; font-weight: 900; margin-bottom: 12px;
+}
+.age-box p { color: #b9b9c6; }
+.age-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+.age-btn { border: 0; border-radius: 12px; padding: 14px 24px; font-size: 16px; font-weight: 700; cursor: pointer; }
+.age-btn.yes { background: #ff2d55; color: #fff; }
+.age-btn.no { background: #2a2a35; color: #ddd; }
+.tiny-dark { font-size: 11px; color: #444; margin-top: 24px; }
+.tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 20px 0; }
+.tiles i {
+  aspect-ratio: 16 / 10; border-radius: 8px; filter: blur(6px);
+  background: linear-gradient(135deg, #e7a07a, #6b3a2e 60%, #1d1d24);
+  animation: blink 1.2s infinite alternate;
+}
+.tiles i:nth-child(2n) { background: linear-gradient(200deg, #c98a6a, #2b1a17); animation-delay: .4s; }
+@keyframes blink { to { opacity: .55; } }
+.bar { height: 10px; background: #26262f; border-radius: 99px; overflow: hidden; }
+#privBar { height: 100%; width: 0; background: #ff2d55; transition: width .25s; }
+#panic { background: #b00020; animation: panicFlash .3s infinite; }
+@keyframes panicFlash { 50% { background: #1a0006; } }
+.siren { font-size: 72px; animation: spin .6s linear infinite; display: inline-block; }
+#panicTitle { font-size: clamp(36px, 9vw, 72px); margin: 8px 0 16px; font-weight: 900; }
+.send { font-family: ui-monospace, monospace; }
