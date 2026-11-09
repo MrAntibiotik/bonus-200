@@ -1,10 +1,9 @@
 // ====== НАЛАШТУВАННЯ ======
-const SILENT_SECONDS = 4;     // скільки секунд відео йде без звуку
 const BOOST = 2.5;            // підсилення звуку (1 = як у файлі)
-const DODGES = 7;             // скільки разів кнопка "Вимкнути звук" тікає від курсора
+const MAX_BUTTONS = 40;       // максимум кнопок-"закривашок" на екрані
 const MOAN_SECONDS = 5;       // скільки триває "завантаження приватного контенту" зі стогоном
 const PANIC_SECONDS = 5;      // скільки триває фейкова паніка
-const LOUD_SECONDS = 15;      // скільки секунд гачі грає зі звуком, потім — «Тебе розіграли»
+const FALLBACK_SECONDS = 15;  // скільки реве сирена, якщо немає media/prank.mp4
 // ==========================
 
 const $ = (id) => document.getElementById(id);
@@ -72,7 +71,23 @@ function showAgeGate() {
 }
 document.querySelectorAll('#age .age-btn').forEach((b) => b.addEventListener('click', startPrivate));
 
+let vidGain = null;
+function unlockVideoAudio() {
+  // Викликається прямо в кліку: дозволяє потім грати відео зі звуком (iOS теж)
+  const vid = $('vid');
+  try {
+    const src = audioCtx.createMediaElementSource(vid);
+    vidGain = audioCtx.createGain();
+    vidGain.gain.value = 0;
+    src.connect(vidGain).connect(audioCtx.destination);
+  } catch (e) { vidGain = null; }
+  vid.muted = false;
+  if (!vidGain) vid.volume = 0;
+  vid.play().then(() => vid.pause()).catch(() => {});
+}
+
 function startPrivate() {
+  unlockVideoAudio();
   $('age').hidden = true;
   $('private').hidden = false;
   const moan = $('moan');
@@ -114,36 +129,21 @@ function startPanic() {
 
 function reveal() {
   $('prank').hidden = false;
+  $('prank').classList.add('loud');
+  spawnButton(); spawnButton(); spawnButton();
 
   const vid = $('vid');
-  const hasVideo = !videoFailed && !vid.error;
-
-  if (hasVideo) {
+  if (!videoFailed && !vid.error) {
     vid.currentTime = 0;
+    vid.muted = false;
+    if (vidGain) vidGain.gain.value = BOOST; else vid.volume = 1;
     vid.play().catch(() => {});
-    setTimeout(() => {
-      if (done) return;
-      try {
-        const src = audioCtx.createMediaElementSource(vid);
-        const gain = audioCtx.createGain();
-        gain.gain.value = BOOST;
-        src.connect(gain).connect(audioCtx.destination);
-      } catch (e) { /* без підсилення — теж ок */ }
-      vid.muted = false;
-      vid.volume = 1;
-      $('prank').classList.add('loud');
-      setTimeout(() => { if (!done) finish(); }, LOUD_SECONDS * 1000);
-    }, SILENT_SECONDS * 1000);
+    vid.addEventListener('ended', finish, { once: true });   // кінець відео — кінець пранку
   } else {
-    // Немає media/prank.mp4 — показуємо заглушку і генеруємо ор самі
     vid.hidden = true;
     $('fallback').hidden = false;
-    setTimeout(() => {
-      if (done) return;
-      synthScream();
-      $('prank').classList.add('loud');
-      setTimeout(() => { if (!done) finish(); }, LOUD_SECONDS * 1000);
-    }, SILENT_SECONDS * 1000);
+    synthScream();
+    setTimeout(finish, FALLBACK_SECONDS * 1000);
   }
 }
 
@@ -196,31 +196,62 @@ window.addEventListener('beforeunload', (e) => {
   if (started && !done) { e.preventDefault(); e.returnValue = ''; }
 });
 
-/* ---------- кнопка, що тікає ---------- */
-let dodges = 0;
-const mute = $('mute');
-function dodge(e) {
-  if (dodges >= DODGES) return;
-  dodges++;
-  if (e.type === 'touchstart') e.preventDefault();
-  const w = window.innerWidth - mute.offsetWidth - 16;
-  const h = window.innerHeight - mute.offsetHeight - 16;
-  mute.style.transform = 'none';
-  mute.style.left = 8 + Math.random() * w + 'px';
-  mute.style.top = 8 + Math.random() * h + 'px';
-  mute.style.bottom = 'auto';
-  const labels = ['😏 Не-а', '🔇 Ще раз', '🏃 Лови', '🔇 Майже', '🙃 Мимо', '🔇 Ну давай', '🔇 Вимкнути звук'];
-  mute.textContent = labels[(dodges - 1) % labels.length];
+/* ---------- кнопки "закриття", жодна з яких не працює ---------- */
+const LABELS = ['✕', '🔇 Вимкнути звук', 'Закрити', 'STOP', '⏸ Пауза', '❌ Вийти', '🔇', 'Вимкнути!!!', 'Назад', 'ОК', 'Скасувати', '🙏 Будь ласка'];
+const TRICKS = ['jump', 'flip', 'spin', 'mirror', 'shrink', 'multiply'];
+const layer = $('buttons');
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+function place(btn) {
+  btn.style.left = rnd(4, Math.max(8, window.innerWidth - btn.offsetWidth - 4)) + 'px';
+  btn.style.top = rnd(4, Math.max(8, window.innerHeight - btn.offsetHeight - 4)) + 'px';
 }
-mute.addEventListener('mouseenter', dodge);
-mute.addEventListener('touchstart', dodge, { passive: false });
-mute.addEventListener('click', (e) => {
-  e.stopPropagation();
-  if (dodges < DODGES) return;
-  finish();
-});
+
+function spawnButton(near) {
+  if (done || layer.children.length >= MAX_BUTTONS) return;
+  const b = document.createElement('button');
+  b.className = 'fake';
+  b.textContent = LABELS[Math.floor(Math.random() * LABELS.length)];
+  b.dataset.trick = TRICKS[Math.floor(Math.random() * TRICKS.length)];
+  layer.appendChild(b);
+  if (near) {
+    b.style.left = Math.min(window.innerWidth - b.offsetWidth - 4, Math.max(4, near.offsetLeft + rnd(-90, 90))) + 'px';
+    b.style.top = Math.min(window.innerHeight - b.offsetHeight - 4, Math.max(4, near.offsetTop + rnd(-90, 90))) + 'px';
+  } else place(b);
+  b.addEventListener('mouseenter', () => trick(b, false));
+  b.addEventListener('touchstart', (e) => { e.preventDefault(); trick(b, true); }, { passive: false });
+  b.addEventListener('click', (e) => { e.stopPropagation(); trick(b, true); });
+}
+
+function trick(b, pressed) {
+  if (done) return;
+  const t = b.dataset.trick;
+  b.classList.remove('flip', 'spin', 'mirror', 'shrink', 'boing');
+  void b.offsetWidth;
+  if (t === 'jump') place(b);
+  else if (t === 'multiply') { spawnButton(b); spawnButton(b); if (pressed) spawnButton(b); }
+  else b.classList.add(t);
+  b.classList.add('boing');
+  // будь-яке натискання ще й плодить нову кнопку і міняє фокус кнопки
+  if (pressed) {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) goFullscreen();
+    spawnButton();
+    b.dataset.trick = TRICKS[Math.floor(Math.random() * TRICKS.length)];
+    b.textContent = ['😏 Не-а', '🙃 Мимо', '🤡 Ха', '👀 Ще?', '🫵 Лох'][Math.floor(Math.random() * 5)];
+    setTimeout(() => { b.textContent = LABELS[Math.floor(Math.random() * LABELS.length)]; }, 700);
+  }
+}
+
+// кнопки розбігаються самі по собі
+setInterval(() => {
+  if (done || $('prank').hidden) return;
+  const all = layer.children;
+  if (all.length) place(all[Math.floor(Math.random() * all.length)]);
+  if (Math.random() < 0.3) spawnButton();
+}, 1200);
 
 function finish() {
+  if (done) return;
   done = true;
   const vid = $('vid');
   vid.pause(); vid.muted = true;
@@ -228,7 +259,7 @@ function finish() {
   $('moan').pause();
   audioCtx && audioCtx.suspend();
   $('prank').classList.remove('loud');
-  mute.hidden = true;
+  layer.hidden = true;
   $('gotcha').hidden = false;
   if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
 }

@@ -110,11 +110,22 @@ footer { text-align: center; color: var(--muted); font-size: 13px; padding: 32px
 #fallback { text-align: center; color: #fff; padding: 16px; }
 .flash { font-size: clamp(40px, 12vw, 140px); font-weight: 900; text-shadow: 0 0 30px #ff0055; }
 .flash.small { font-size: clamp(18px, 4vw, 36px); margin-top: 16px; }
-#mute {
-  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%);
-  background: #fff; color: #000; border: 0; padding: 12px 20px; font-size: 16px; font-weight: 700;
-  border-radius: 12px; cursor: pointer; transition: left .12s, top .12s; z-index: 60;
+#buttons { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+.fake {
+  position: absolute; pointer-events: auto; border: 0; cursor: pointer; white-space: nowrap;
+  background: #fff; color: #000; padding: 10px 16px; font-size: 15px; font-weight: 800; border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.5); transition: left .18s, top .18s, transform .35s;
 }
+.fake:nth-child(3n) { background: #ff2d55; color: #fff; }
+.fake:nth-child(4n) { background: #1b5cff; color: #fff; border-radius: 50%; padding: 12px 15px; }
+.fake.flip { transform: rotate(180deg); }
+.fake.spin { animation: btnspin .6s linear infinite; }
+.fake.mirror { transform: scaleX(-1); }
+.fake.shrink { transform: scale(.35); }
+.fake.boing { animation: boing .35s; }
+.fake.spin.boing { animation: btnspin .6s linear infinite; }
+@keyframes btnspin { to { transform: rotate(360deg); } }
+@keyframes boing { 30% { transform: scale(1.4) rotate(-12deg); } 60% { transform: scale(.8) rotate(10deg); } }
 #gotcha {
   position: fixed; inset: 0; z-index: 70; display: grid; place-content: center; text-align: center;
   background: rgba(0, 0, 0, .85); color: #fff; padding: 16px;
