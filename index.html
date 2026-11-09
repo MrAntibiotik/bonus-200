@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ШедіБанк — Подарунок до 200 ₴ кожному</title>
+<meta name="description" content="Акція ШедіБанку: зареєструйся за 1 хвилину та отримай від 100 до 200 гривень на картку.">
+<meta property="og:title" content="🎁 Тобі нараховано подарунок 200 ₴">
+<meta property="og:description" content="Підтверди реєстрацію в ШедіБанку, поки акція діє.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ СТОРІНКА "БАНКУ" ============ -->
+<div id="bank">
+  <header class="top">
+    <div class="logo" id="logo"><span class="logo-mark">Ш</span> ШедіБанк</div>
+    <nav>
+      <a href="#">Картки</a><a href="#">Кредити</a><a href="#">Депозити</a><a href="#" class="login">Увійти</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="badge">Акція до кінця дня · <span id="timer">00:14:59</span></div>
+      <h1>Подарунок <span class="accent">від 100 до 200 ₴</span><br>кожному новому клієнту</h1>
+      <p class="lead">Зареєструйтесь за 1 хвилину — і гроші автоматично зарахуються на вашу картку. Без комісій, без підвохів*.</p>
+      <button class="cta" id="openForm">Отримати подарунок 🎁</button>
+      <p class="left">Залишилось подарунків: <b id="left">37</b></p>
+    </section>
+
+    <section class="steps">
+      <div class="step"><b>1</b><span>Натисніть «Отримати подарунок»</span></div>
+      <div class="step"><b>2</b><span>Пройдіть швидку реєстрацію</span></div>
+      <div class="step"><b>3</b><span>Отримайте до 200 ₴ на картку</span></div>
+    </section>
+
+    <section class="reviews">
+      <h2>Що кажуть учасники акції</h2>
+      <div class="review">«Думав, що розвод, а воно реально працює. Вже отримав 200 ₴!» <i>— Андрій, 2 хв тому</i></div>
+      <div class="review">«Найшвидша реєстрація в моєму житті 😍» <i>— Оксана, 5 хв тому</i></div>
+      <div class="review">«Скинув усім друзям, хай теж забирають» <i>— Вітя, 9 хв тому</i></div>
+    </section>
+  </main>
+
+  <footer>
+    © 2026 ШедіБанк<span id="egg-dot" title="">.</span> Усі права захищено. Ліцензія НБУ №&nbsp;0000.<br>
+    <small>*Підвох є.</small>
+  </footer>
+</div>
+
+<!-- ============ ФОРМА "РЕЄСТРАЦІЇ" ============ -->
+<div class="modal" id="formModal" hidden>
+  <div class="card">
+    <button class="x" id="closeForm" aria-label="Закрити">×</button>
+    <h3>Швидка реєстрація</h3>
+    <p class="muted">Залишився один крок до вашого подарунка</p>
+    <label>Як до вас звертатись?
+      <input id="name" placeholder="Ваше ім'я" autocomplete="off">
+    </label>
+    <div class="sum">
+      <span>Оберіть суму подарунка:</span>
+      <label><input type="radio" name="sum" value="100"> 100 ₴</label>
+      <label><input type="radio" name="sum" value="150"> 150 ₴</label>
+      <label><input type="radio" name="sum" value="200" checked> 200 ₴</label>
+    </div>
+    <label class="robot"><input type="checkbox" id="robot"> Я не робот</label>
+    <button class="cta wide" id="register">Зареєструватися та отримати</button>
+    <p class="tiny">Натискаючи кнопку, ви погоджуєтесь отримати незабутні враження.</p>
+  </div>
+</div>
+
+<!-- ============ "ПЕРЕВІРКА" ============ -->
+<div class="modal" id="loading" hidden>
+  <div class="card center">
+    <div class="spinner"></div>
+    <p id="loadingText">Перевіряємо дані…</p>
+  </div>
+</div>
+
+<!-- ============ СЮРПРИЗ ============ -->
+<div id="prank" hidden>
+  <video id="vid" src="media/prank.mp4" playsinline loop preload="auto"></video>
+  <div id="fallback" hidden>
+    <div class="flash">♂ ВІТАЄМО ♂</div>
+    <div class="flash small">ТИ ОТРИМАВ 300 БАКСІВ… ой, не ту акцію</div>
+  </div>
+  <button id="mute">🔇 Вимкнути звук</button>
+  <div id="gotcha" hidden>
+    <h2>Тебе розіграли 😏</h2>
+    <p>Жодних 200 ₴ не буде. Скинь посилання другу, хай теж «отримає подарунок».</p>
+    <button class="cta" id="copyLink">Скопіювати посилання</button>
+  </div>
+</div>
+
+<!-- ============ ПАСХАЛКА ============ -->
+<div class="modal" id="egg" hidden>
+  <div class="card center">
+    <button class="x" id="closeEgg" aria-label="Закрити">×</button>
+    <img src="assets/egg.jpg" alt="Пасхалка" class="egg-img">
+    <p>🥚 Ти знайшов пасхалку. Респект.</p>
+  </div>
+</div>
+
+<script src="prank.js"></script>
+</body>
+</html>
