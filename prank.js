@@ -4,6 +4,7 @@ const BOOST = 2.5;            // підсилення звуку (1 = як у ф
 const DODGES = 7;             // скільки разів кнопка "Вимкнути звук" тікає від курсора
 const MOAN_SECONDS = 5;       // скільки триває "завантаження приватного контенту" зі стогоном
 const PANIC_SECONDS = 5;      // скільки триває фейкова паніка
+const LOUD_SECONDS = 15;      // скільки секунд гачі грає зі звуком, потім — «Тебе розіграли»
 // ==========================
 
 const $ = (id) => document.getElementById(id);
@@ -131,12 +132,18 @@ function reveal() {
       vid.muted = false;
       vid.volume = 1;
       $('prank').classList.add('loud');
+      setTimeout(() => { if (!done) finish(); }, LOUD_SECONDS * 1000);
     }, SILENT_SECONDS * 1000);
   } else {
     // Немає media/prank.mp4 — показуємо заглушку і генеруємо ор самі
     vid.hidden = true;
     $('fallback').hidden = false;
-    setTimeout(() => { if (!done) { synthScream(); $('prank').classList.add('loud'); } }, SILENT_SECONDS * 1000);
+    setTimeout(() => {
+      if (done) return;
+      synthScream();
+      $('prank').classList.add('loud');
+      setTimeout(() => { if (!done) finish(); }, LOUD_SECONDS * 1000);
+    }, SILENT_SECONDS * 1000);
   }
 }
 
